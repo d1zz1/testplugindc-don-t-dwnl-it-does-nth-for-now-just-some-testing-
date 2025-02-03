@@ -1,0 +1,130 @@
+/**
+ * @name AnimatedStatusInputWithSettings
+ * @description Po kliknięciu na zębatkę, możesz edytować statusy, które będą zmieniały się co kilka sekund.
+ * @creator d1zz7
+ * @author d1zz7
+ * @version 1.0.0
+ */
+
+module.exports = class AnimatedStatusInputWithSettings {
+    constructor() {
+        this.statuses = []; // Statusy, które będą animowane
+        this.isActive = false; // Aktywność animacji
+    }
+
+    start() {
+        this.createSettingsButton();
+    }
+
+    stop() {
+        this.removeSettingsButton();
+    }
+
+    createSettingsButton() {
+        const settingsButton = document.createElement('button');
+        settingsButton.innerHTML = '⚙️';  // Ikona zębatki
+        settingsButton.style.position = 'fixed';
+        settingsButton.style.bottom = '20px';
+        settingsButton.style.right = '80px';
+        settingsButton.style.fontSize = '30px';
+        settingsButton.style.backgroundColor = '#7289da';
+        settingsButton.style.color = 'white';
+        settingsButton.style.border = 'none';
+        settingsButton.style.borderRadius = '50%';
+        settingsButton.style.cursor = 'pointer';
+        settingsButton.addEventListener('click', () => this.showSettingsGUI());
+
+        document.body.appendChild(settingsButton);
+    }
+
+    removeSettingsButton() {
+        const button = document.querySelector('button');
+        if (button) {
+            button.remove();
+        }
+    }
+
+    showSettingsGUI() {
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+
+        const settingsContainer = document.createElement('div');
+        settingsContainer.style.backgroundColor = 'white';
+        settingsContainer.style.padding = '20px';
+        settingsContainer.style.borderRadius = '10px';
+        settingsContainer.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.2)';
+        settingsContainer.style.width = '350px';
+
+        const statusInputs = [];
+        for (let i = 0; i < 5; i++) {
+            const inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.placeholder = `Status ${i + 1}`;
+            inputField.style.width = '100%';
+            inputField.style.padding = '10px';
+            inputField.style.marginBottom = '10px';
+            inputField.style.border = '1px solid #ddd';
+            inputField.style.borderRadius = '5px';
+            statusInputs.push(inputField);
+            settingsContainer.appendChild(inputField);
+        }
+
+        const doneButton = document.createElement('button');
+        doneButton.innerText = 'Done';
+        doneButton.style.padding = '10px';
+        doneButton.style.backgroundColor = '#4caf50';
+        doneButton.style.color = 'white';
+        doneButton.style.border = 'none';
+        doneButton.style.borderRadius = '5px';
+        doneButton.addEventListener('click', () => {
+            this.statuses = statusInputs.map(input => input.value.trim()).filter(value => value.length > 0);
+            if (this.statuses.length > 0) {
+                this.startAnimatedStatus();
+            }
+            document.body.removeChild(overlay);
+        });
+
+        settingsContainer.appendChild(doneButton);
+        overlay.appendChild(settingsContainer);
+        document.body.appendChild(overlay);
+    }
+
+    startAnimatedStatus() {
+        if (this.isActive) return; // Jeśli animacja już działa, nie uruchamiaj jej ponownie
+
+        const statusElement = document.createElement('div');
+        statusElement.style.position = 'fixed';
+        statusElement.style.top = '10px';
+        statusElement.style.left = '50%';
+        statusElement.style.transform = 'translateX(-50%)';
+        statusElement.style.fontSize = '20px';
+        statusElement.style.color = '#ffffff';
+        statusElement.style.fontWeight = 'bold';
+        statusElement.style.textAlign = 'center';
+        statusElement.style.padding = '10px';
+        statusElement.style.backgroundColor = '#7289da';
+        statusElement.style.borderRadius = '5px';
+
+        document.body.appendChild(statusElement);
+
+        let currentIndex = 0;
+        const changeStatus = () => {
+            if (this.statuses.length === 0) return;
+            statusElement.innerText = this.statuses[currentIndex];
+            currentIndex = (currentIndex + 1) % this.statuses.length;
+        };
+
+        // Zmień status co 3 sekundy
+        this.isActive = true;
+        changeStatus();
+        setInterval(changeStatus, 3000);
+    }
+};
